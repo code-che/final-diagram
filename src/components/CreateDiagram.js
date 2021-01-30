@@ -2,8 +2,10 @@ import React, {useState} from 'react';
 import Diagram, {createSchema, useSchema} from 'beautiful-react-diagrams';
 import 'beautiful-react-diagrams/styles.css';
 
-const CustomRender = ({ id, content, data, inputs, outputs }) => (
-    <div className="node">
+
+
+const NewNodeRender = ({ id, content, data, inputs }) => (
+    <div className="new-node">
         <div className="header-node">
             <span className="controller-name">ali</span>
             <button onClick={()=>data.onClick(id)} >X</button>
@@ -11,9 +13,22 @@ const CustomRender = ({ id, content, data, inputs, outputs }) => (
         <div role="button" style={{padding: '15px'}}>
             {content}
         </div>
-        <div style={{marginTop: '10px',display:'flex', justifyContent:'space-between'}}>
-            {inputs.map((port) => React.cloneElement(port, {style: { width: '25px', height: '25px', background: '#1B263B' }}))}
-            {outputs.map((port) => React.cloneElement(port, {style: { width: '25px', height: '25px', background: '#1B263B' }}))}
+        <div style={{marginTop: '10px',display:'flex', justifyContent:'space-between', alignItems: 'center'}}>
+            {inputs.map((port) => React.cloneElement(port, {style: { width: '100%', height: '1.5em', background: '#1B263B' }}))}
+        </div>
+    </div>
+);
+
+const NodeRender = ({ content, inputs }) => (
+    <div className="node">
+        <div className="header-node">
+            <span className="controller-name">ali</span>
+        </div>
+        <div role="button" style={{padding: '15px'}}>
+            {content}
+        </div>
+        <div style={{marginTop: '10px',display:'flex', justifyContent:'space-between', alignItems: 'center'}}>
+            {inputs.map((port) => React.cloneElement(port, {style: { width: '100%', height: '1.5em', background: 'darkgray' }}))}
         </div>
     </div>
 );
@@ -24,30 +39,24 @@ function CreateDiagram( props ) {
     let nodesOfTree = [];
     let links = [];
 
-    // const [schema, { onChange, addNode, removeNode }] = useSchema(initialSchema);
-
     const createNode = (node) => {
-        let y = node.treeLevel * 200;
-        let x = Math.floor(Math.random() * Math.floor(1000));
-        return {
-            id : node.id,
-            content: node.title,
-            coordinates: [x,y],
+        let y = 0;
+        let x = 0;
+        if (node["coordinates"] === undefined) {
+            y = node.treeLevel * 200;
+            x = Math.floor(Math.random() * Math.floor(1000));
         }
-
-        const nextNode = {
+        else {
+            y = node.coordinates[1];
+            x = node.coordinates[0];
+        }
+        return {
             id: node.id,
             content: node.title,
-            coordinates: [
-                Math.floor(Math.random() * Math.floor(1000)),
-                node.treeLevel * 200,
-            ],
-            render: CustomRender,
-            data: {onClick: deleteNodeFromSchema},
-            inputs: [{ id: node.id}],
-        };
-
-        addNode(nextNode);
+            coordinates: [x, y],
+            render: NodeRender,
+            inputs: [ { id: node.id } ],
+        }
     }
 
 
@@ -68,8 +77,6 @@ function CreateDiagram( props ) {
     }
 
     drawTree(nodes)
-    // console.log(nodesOfTree);
-    // console.log(links);
 
     const [titleInputState, setTitleInputState] = useState("");
     const handlerTitleInput = (event) => {
@@ -94,44 +101,43 @@ function CreateDiagram( props ) {
                 schema.nodes[schema.nodes.length - 1].coordinates[0] + 100,
                 schema.nodes[schema.nodes.length - 1].coordinates[1],
             ],
-            render: CustomRender,
+            render: NewNodeRender,
             data: {onClick: deleteNodeFromSchema},
-            inputs: [{ id: `port-${Math.random()}`}],
-            outputs: [{ id: `port-${Math.random()}`}],
+            inputs: [{ id: `port-${Math.random()}`}]
         };
 
         addNode(nextNode);
     }
 
-    // console.log(Math.floor(Math.random() * Math.floor(1000)));
-
-    // function searchNode(node, matchingIdNode){
-    //     if(node.id === matchingIdNode){
-    //         return node;
-    //     }else if (node.children != null){
-    //         var i;
-    //         var result = null;
-    //         for(i=0; result == null && i < node.children.length; i++){
-    //             result = searchNode(node.children[i], matchingIdNode);
-    //         }
-    //         return result;
-    //     }
-    //     return null;
-    // }
-
-    // const initialSchema = createSchema({
-    //     nodes: [
-    //         { id: 'node-1', content: 'Node 1', coordinates: [250, 0], },
-    //         { id: 'node-2', content: 'Node 2', coordinates: [100, 200], },
-    //         { id: 'node-3', content: 'Node 3', coordinates: [250, 220], },
-    //         { id: 'node-4', content: 'Node 4', coordinates: [400, 200], },
-    //     ],
-    //     links: [
-    //         { input: 'node-1',  output: 'node-2' },
-    //         { input: 'node-1',  output: 'node-3' },
-    //         { input: 'node-1',  output: 'node-4' },
-    //     ]
-    // });
+    const submit = (event) => {
+        let listOfNodes = []
+        for ( let node of schema.nodes) {
+            let x = node.coordinates[0] - node.coordinates[0]%100;
+            let y = node.coordinates[1] - node.coordinates[1]%200;
+            let parentId = "";
+            let inputId = node.inputs[0]["id"];
+            for ( let link of schema.links ){
+                if ( inputId === link["input"]){
+                    if (link["output"] < link["input"]) {
+                        parentId = link["output"];
+                    }
+                }
+                if ( inputId === link["output"]){
+                    if (link["input"] < link["output"]) {
+                        parentId = link["input"];
+                    }
+                }
+            }
+            let temp = {
+                title: node.content,
+                id: node.id,
+                treeLevel: y/200,
+                coordinates: [x, y],
+                parentId: parentId
+            }
+            listOfNodes.push(temp);
+        }
+    }
 
     const initialSchema = createSchema({
         nodes: [
@@ -149,11 +155,14 @@ function CreateDiagram( props ) {
     return (
         <div className="Simple-diagram">
             <div className="add-node">
-                <button className="add-node-btn" onClick={addNewNode} >add node</button>
+                <button className="add-node-btn" onClick={addNewNode} >اضافه کردن تسک</button>
                 <input className="title-input" onChange={handlerTitleInput} type="text" placeholder="title of node" />
             </div>
             <div className="tree-container">
                 <Diagram schema={schema} onChange={onChange} />
+            </div>
+            <div className="sbmit">
+                <button className="submit-btn" onClick={submit} >ثبت</button>
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from 'react';
+import React, {useState , useEffect} from 'react';
 import CreateDiagram from "./CreateDiagram";
 
 function Diagram() {
@@ -66,10 +66,37 @@ function Diagram() {
         parentId : ""
     }
 
-    let listOfNodes = [node1, node2, node3, node4, node5, node6, node7, node8, node9, node21]
+    let listOfNodes = [];
+    // listOfNodes = [node1, node2, node3, node4, node5, node6, node7, node8, node9, node21]
+
+    const [dataState, setDataState] = useState([])
+
+    const axios = require('axios');
+    axios.get('https://project.dinavision.org/api/v1/Project/GenerateLevels?userId=1233').then(response => {
+        setDataState(response.data.data.projects)
+    }).catch( error => {
+        console.log(error);
+    })
+
+
+    const click = (event) => {
+        console.log(dataState);
+
+        for ( let project of dataState ){
+            // console.log(typeof project.id);
+            listOfNodes.push({
+                title: project.title,
+                id: project.id.toString(),
+                treeLevel: 3,
+                parentId : project.parentId.toString()
+            })
+        }
+        console.log(listOfNodes);
+    }
 
     return (
         <>
+            <button onClick={click}>click</button>
             <CreateDiagram nodes={listOfNodes}/>
         </>
     );

@@ -14,15 +14,19 @@
   width: 100%;
 }
 
-.add-node {
-}
-
 .add-node-btn {
   padding: 0.5em;
-  width: 7em;
-  background-color: #316bfd;
+  color: white;
+  background-color: #3b92fd;
   border-radius: 0.3em;
+  border: none;
+  box-shadow: 0.1em 0.3em 10px gray;
   margin-right: 2em;
+}
+
+.add-node-btn:active {
+  box-shadow: none;
+  border: none;
 }
 
 .title-input {
@@ -33,6 +37,7 @@
   border: crimson solid 0.1em;
   border-radius: 0.3em;
   padding: 0.6em;
+  background-color: #ffffff;
 }
 
 .controller-name {
@@ -42,4 +47,19 @@
 .header-node {
   display: flex;
   justify-content: space-between;
+}
+
+.new-node {
+  border: #146edc solid 0.1em;
+  border-radius: 0.3em;
+  padding: 0.6em;
+  background-color: #9cbdff;
+}
+
+.submit-btn {
+  padding: 0.5em 2em;
+  background-color: #4CAF50;
+  border-radius: 0.3em;
+  border: none;
+  margin-right: 2em;
 }
