@@ -7,6 +7,7 @@
 
 /.idea
 .eslintcache
+/.vscode
 # testing
 /coverage
 

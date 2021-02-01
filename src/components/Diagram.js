@@ -1,6 +1,14 @@
 import React, {useState , useEffect} from 'react';
 import CreateDiagram from "./CreateDiagram";
 
+const RootDiv = ( id, content, rootNode, onClick ) => {
+    return (
+        <div className="root" onClick={ () => onClick(id, rootNode)}>
+            <span>{content}</span>
+        </div>
+    )
+}
+
 function Diagram() {
 
 
@@ -70,14 +78,14 @@ function Diagram() {
 
     const [dataState, setDataState] = useState({
         projects: [],
-        routes: [],
+        roots: [],
         nodes: []
     });
     const [dataIsReady, setDataIsReady] = useState(false);
     const [listOfNodesState, setListOfNodesState] = useState([]);
     const [styleState, setStyleState] = useState({
         height: "1000px",
-        width : "1500px",
+        width : "100%",
     });
 
     useEffect(() => {
@@ -85,9 +93,10 @@ function Diagram() {
         axios.get('https://project.dinavision.org/api/v1/Project/GenerateLevels?userId=1233').then(response => {
             setDataState({
                 projects: response.data.data.projects,
-                routes:response.data.data.projects.filter( item => item.parentId === 0),
+                roots:response.data.data.projects.filter( item => item.parentId === 0),
                 nodes: []
             })
+            setDataIsReady(true);
         }).catch( error => {
             console.log(error);
         })
@@ -95,77 +104,155 @@ function Diagram() {
 
 
     let listOfNodes = [];
-    const render = (event) => {
-        console.log(dataState.projects);
+    // const render = (event) => {
+    //     console.log(dataState.projects);
+    //     if ( dataState.projects.length !== 0 ){
+    //         let maxWidth = 0, maxHeight = 0;
+    //         let rootProject = dataState.roots[2];
+    //         let coordinatesRoot = [];
+    //         if (!(rootProject.xLocation === 0 && rootProject.yLocation === 0)) {
+    //             coordinatesRoot = [rootProject.xLocation, rootProject.yLocation];
+    //             if ( maxWidth < rootProject.xLocation)
+    //                 maxWidth = rootProject.xLocation;
+    //             if ( maxHeight < rootProject.yLocation)
+    //                 maxHeight = rootProject.yLocation;
+    //         }
+    //         listOfNodes.push({
+    //             title: rootProject.title,
+    //             id: rootProject.id.toString(),
+    //             treeLevel: rootProject.treeLevel,
+    //             parentId: '',
+    //             coordinates: coordinatesRoot,
+    //             route: rootProject.route
+    //         })
+    //         let rootId = rootProject.id.toString();
+    //
+    //         for ( let project of dataState.projects ){
+    //             // console.log(project.root);
+    //             if ( project.route !== null) {
+    //                 let parentList = project.route.split("/");
+    //                 if ( parentList.indexOf(rootId) >= 0) {
+    //                     let coordinates = [];
+    //                     if (!(project.xLocation === 0 && project.yLocation === 0)) {
+    //                         coordinates = [project.xLocation, project.yLocation];
+    //                         if ( maxWidth < project.xLocation)
+    //                             maxWidth = project.xLocation;
+    //                         if ( maxHeight < project.yLocation)
+    //                             maxHeight = project.yLocation;
+    //                     }
+    //                     listOfNodes.push({
+    //                         title: project.title,
+    //                         id: project.id.toString(),
+    //                         treeLevel: project.treeLevel,
+    //                         parentId: project.parentId.toString(),
+    //                         coordinates: coordinates,
+    //                         route: project.route
+    //                     })
+    //                 }
+    //             }
+    //         }
+    //         if ( 1000 < maxHeight * 2 ){
+    //             setStyleState( prevState => ({
+    //                 ...prevState,
+    //                 height: (maxHeight * 2).toString() + "px",
+    //             }))
+    //         }
+    //         if ( 1500 < maxWidth * 2 ){
+    //             setStyleState( prevState => ({
+    //                 ...prevState,
+    //                 width: (Math.floor(maxWidth * 1.5)).toString() + "px",
+    //             }))
+    //         }
+    //         setListOfNodesState(listOfNodes);
+    //         setDataIsReady(true);
+    //         console.log(listOfNodes);
+    //         // console.log(listOfNodesState);
+    //         // console.log(dataIsReady);
+    //     }
+    // }
 
-        let maxWidth = 0, maxHeight = 0;
-        let routeProject = dataState.routes[2];
-        let coordinatesRoute = [];
-        if (!(routeProject.xLocation === 0 && routeProject.yLocation === 0)) {
-            coordinatesRoute = [routeProject.xLocation, routeProject.yLocation];
-            if ( maxWidth < routeProject.xLocation)
-                maxWidth = routeProject.xLocation;
-            if ( maxHeight < routeProject.yLocation)
-                maxHeight = routeProject.yLocation;
-        }
-        listOfNodes.push({
-            title: routeProject.title,
-            id: routeProject.id.toString(),
-            treeLevel: routeProject.treeLevel,
-            parentId: '',
-            coordinates: coordinatesRoute
-        })
-        let routeId = routeProject.id.toString();
 
-        for ( let project of dataState.projects ){
-            // console.log(project.route);
-            if ( project.route !== null) {
-                let parentList = project.route.split("/");
-                if ( parentList.indexOf(routeId) >= 0) {
-                    let coordinates = [];
-                    if (!(project.xLocation === 0 && project.yLocation === 0)) {
-                        coordinates = [project.xLocation, project.yLocation];
-                        if ( maxWidth < project.xLocation)
-                            maxWidth = project.xLocation;
-                        if ( maxHeight < project.yLocation)
-                            maxHeight = project.yLocation;
+    const clickOnRoot = (id, rootNode) => {
+        if ( dataState.projects.length !== 0 ){
+            let maxWidth = 0, maxHeight = 0;
+            let coordinatesRoot = [];
+            if (!(rootNode.xLocation === 0 && rootNode.yLocation === 0)) {
+                coordinatesRoot = [rootNode.xLocation, rootNode.yLocation];
+                if ( maxWidth < rootNode.xLocation)
+                    maxWidth = rootNode.xLocation;
+                if ( maxHeight < rootNode.yLocation)
+                    maxHeight = rootNode.yLocation;
+            }
+            listOfNodes.push({
+                title: rootNode.title,
+                id: rootNode.id.toString(),
+                treeLevel: rootNode.treeLevel,
+                parentId: '',
+                coordinates: coordinatesRoot,
+                route: rootNode.route
+            })
+            let rootId = id.toString();
+
+            for ( let project of dataState.projects ){
+                // console.log(project.root);
+                if ( project.route !== null) {
+                    let parentList = project.route.split("/");
+                    if ( parentList.indexOf(rootId) >= 0) {
+                        let coordinates = [];
+                        if (!(project.xLocation === 0 && project.yLocation === 0)) {
+                            coordinates = [project.xLocation, project.yLocation];
+                            if ( maxWidth < project.xLocation)
+                                maxWidth = project.xLocation;
+                            if ( maxHeight < project.yLocation)
+                                maxHeight = project.yLocation;
+                        }
+                        listOfNodes.push({
+                            title: project.title,
+                            id: project.id.toString(),
+                            treeLevel: project.treeLevel,
+                            parentId: project.parentId.toString(),
+                            coordinates: coordinates,
+                            route: project.route
+                        })
                     }
-                    listOfNodes.push({
-                        title: project.title,
-                        id: project.id.toString(),
-                        treeLevel: project.treeLevel,
-                        parentId: project.parentId.toString(),
-                        coordinates: coordinates,
-                        route: project.route
-                    })
                 }
             }
+            if ( 1000 < maxHeight * 2 ){
+                setStyleState( prevState => ({
+                    ...prevState,
+                    height: (maxHeight * 2).toString() + "px",
+                }))
+            }
+            if ( 2000 < maxWidth * 2 ){
+                setStyleState( prevState => ({
+                    ...prevState,
+                    width: (Math.floor(maxWidth * 1.5)).toString() + "px",
+                }))
+            }
+            setListOfNodesState(listOfNodes);
+            setDataIsReady(true);
+            console.log(listOfNodes);
+            // console.log(listOfNodesState);
+            // console.log(dataIsReady);
         }
-        if ( 1000 < maxHeight * 2 ){
-            setStyleState( prevState => ({
-                ...prevState,
-                height: (maxHeight * 2).toString() + "px",
-            }))
+    }
+
+    const renderListOfRoot = () => {
+        if (dataIsReady){
+            return (
+                <div className="list-of-root">
+                    {dataState.roots.map( rootNode => RootDiv(rootNode.id, rootNode.title, rootNode, clickOnRoot))}
+                </div>
+            )
         }
-        if ( 1500 < maxWidth * 2 ){
-            setStyleState( prevState => ({
-                ...prevState,
-                width: (Math.floor(maxWidth * 1.5)).toString() + "px",
-            }))
-        }
-        setListOfNodesState(listOfNodes);
-        setDataIsReady(true);
-        console.log(listOfNodes);
-        // console.log(listOfNodesState);
-        // console.log(dataIsReady);
+        else
+            return null;
     }
 
     const creatDiagram = () => {
-        if (dataIsReady){
+        if (listOfNodesState.length !== 0){
             return (
-                <div className="frame" style={styleState}>
-                    <CreateDiagram nodes={listOfNodesState}/>
-                </div>
+                <CreateDiagram nodes={listOfNodesState}/>
             )
         }
         else
@@ -174,9 +261,13 @@ function Diagram() {
 
     return (
         <>
-            <button onClick={render}>click</button>
+            {/*<button onClick={render}>click</button>*/}
             {/*<CreateDiagram nodes={listOfNodes}/>*/}
-            {creatDiagram()}
+            <div className="frame" style={styleState}>
+                {renderListOfRoot()}
+                {/*{creatDiagram()}*/}
+                <CreateDiagram nodes={listOfNodesState}/>
+            </div>
         </>
     );
 }
