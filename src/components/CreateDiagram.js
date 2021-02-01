@@ -33,9 +33,8 @@ const NodeRender = ({ id, content, data, inputs }) => (
     </div>
 );
 
-function CreateDiagram( props ) {
+function CreateDiagram( {nodes} ) {
 
-    let nodes = props.nodes;
     let nodesOfTree = [];
     let links = [];
 
@@ -175,6 +174,7 @@ function CreateDiagram( props ) {
         }
     }
 
+    // const [li]
     const drawTree = (nodes) => {
         for ( let node of nodes) {
             nodesOfTree.push(createNode(node));
@@ -184,8 +184,9 @@ function CreateDiagram( props ) {
         }
     }
 
+    console.log(nodesOfTree);
     drawTree(nodes)
-
+    console.log(nodesOfTree);
     const [titleInputState, setTitleInputState] = useState("");
     const handlerTitleInput = (event) => {
         setTitleInputState(event.target.value);
@@ -321,8 +322,8 @@ function CreateDiagram( props ) {
     });
 
     const [schema, { onChange, addNode, removeNode }] = useSchema(initialSchema);
-    // console.log(schema);
-
+    console.log(schema);
+    console.log(nodesOfTree);
 
     return (
         <div className="Simple-diagram">

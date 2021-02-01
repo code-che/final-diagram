@@ -103,7 +103,7 @@ function Diagram() {
     }, [])
 
 
-    let listOfNodes = [];
+
     // const render = (event) => {
     //     console.log(dataState.projects);
     //     if ( dataState.projects.length !== 0 ){
@@ -173,6 +173,8 @@ function Diagram() {
 
 
     const clickOnRoot = (id, rootNode) => {
+        console.log("dddddd");
+        let listOfNodes = [];
         if ( dataState.projects.length !== 0 ){
             let maxWidth = 0, maxHeight = 0;
             let coordinatesRoot = [];
@@ -231,7 +233,7 @@ function Diagram() {
             }
             setListOfNodesState(listOfNodes);
             setDataIsReady(true);
-            console.log(listOfNodes);
+            console.log(listOfNodesState);
             // console.log(listOfNodesState);
             // console.log(dataIsReady);
         }
@@ -265,8 +267,8 @@ function Diagram() {
             {/*<CreateDiagram nodes={listOfNodes}/>*/}
             <div className="frame" style={styleState}>
                 {renderListOfRoot()}
+                {listOfNodesState.length !== 0 && <CreateDiagram nodes={listOfNodesState}/>}
                 {/*{creatDiagram()}*/}
-                <CreateDiagram nodes={listOfNodesState}/>
             </div>
         </>
     );
