@@ -102,8 +102,6 @@ function Diagram() {
         })
     }, [])
 
-
-
     // const render = (event) => {
     //     console.log(dataState.projects);
     //     if ( dataState.projects.length !== 0 ){

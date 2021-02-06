@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import Diagram, {createSchema, useSchema} from 'beautiful-react-diagrams';
 import 'beautiful-react-diagrams/styles.css';
 
@@ -41,10 +41,19 @@ function CreateDiagram( {nodes} ) {
     const updateCoordinates = ( event, id ) => {
         let x = 0;
         let y = 0;
-        for ( let node of schema.nodes ){
+        // console.log(initialSchema);
+        // console.log(schema);
+        // console.log("//////////////");
+        for ( let node of initialSchema.nodes ){
+            console.log(node);
+            console.log(node.id);
+            console.log(schema);
+            console.log(id);
+            console.log("----------");
             if ( node.id === id ) {
                 x = node.coordinates[0] - node.coordinates[0]%200;
                 y = node.coordinates[1] - node.coordinates[1]%100;
+                console.log(`x: ${x} y: ${y}`)
             }
         }
 
@@ -62,7 +71,7 @@ function CreateDiagram( {nodes} ) {
     const updateNodeData = ( event, id, content ) => {
         let x = 0;
         let y = 0;
-        for ( let node of schema.nodes ){
+        for ( let node of initialSchema.nodes ){
             if ( node.id === id ) {
                 x = node.coordinates[0] - node.coordinates[0]%200;
                 y = node.coordinates[1] - node.coordinates[1]%100;
@@ -89,7 +98,7 @@ function CreateDiagram( {nodes} ) {
             return tempList
         })
         // let parentId = "";
-        // for ( let link of schema.links ){
+        // for ( let link of initialSchema.links ){
         //     if ( id === link["input"] ){
         //         if (link["output"] < link["input"]) {
         //             parentId = link["output"];
@@ -114,11 +123,8 @@ function CreateDiagram( {nodes} ) {
         //     }
         //
         // }
-        // console.log('dfffffffffffffffffffffff');
-        // console.log(data);
-        // console.log(schema.links);
+        // console.log(initialSchema.links);
         // if ( data !== undefined) {
-        //     console.log("ddddddddddd");
         //     setNewNodeList(prevState =>{
         //         let tempList = prevState;
         //         let exist = false;
@@ -174,47 +180,59 @@ function CreateDiagram( {nodes} ) {
         }
     }
 
-    // const [li]
-    const drawTree = (nodes) => {
+    const [nodesOfTreeState, setNodesOfTree] = useState([]);
+    const [linksState, setLinkState] = useState([]);
+    useEffect(() => {
         for ( let node of nodes) {
             nodesOfTree.push(createNode(node));
             if ( node.parentId !== '') {
                 links.push(createLink(node))
             }
         }
-    }
+        setNodesOfTree(nodesOfTree);
+        setLinkState(links);
+    }, [nodes])
+    // const drawTree = (nodes) => {
+    //     for ( let node of nodes) {
+    //         nodesOfTree.push(createNode(node));
+    //         if ( node.parentId !== '') {
+    //             links.push(createLink(node))
+    //         }
+    //     }
+    //     setNodesOfTree(nodesOfTree);
+    //     setLinkState(links)
+    // }
 
-    console.log(nodesOfTree);
-    drawTree(nodes)
-    console.log(nodesOfTree);
+    // console.log(nodesOfTree);
+    // drawTree(nodes)
+    // console.log(nodesOfTree);
     const [titleInputState, setTitleInputState] = useState("");
     const handlerTitleInput = (event) => {
         setTitleInputState(event.target.value);
     }
 
     // const logNodes = (event) => {
-    //     console.log(schema.nodes);
+    //     console.log(initialSchema.nodes);
     //     console.log(titleInputState);
     // }
 
     const deleteNodeFromSchema = (id) => {
-        const nodeToRemove = schema.nodes.find(node => node.id === id);
+        const nodeToRemove = initialSchema.nodes.find(node => node.id === id);
         removeNode(nodeToRemove);
     };
 
 
     const [idRenderState, setIdRender] = useState(999999);
     const addNewNode = () => {
-        console.log("edddddddddd");
-        // setIdRender(prevState => prevState + 1);
+        setIdRender(prevState => prevState + 1);
         let newNodeId = idRenderState.toString();
         // setNewNodeList(prevState => [...prevState, newNodeId]);
         const nextNode = {
             id: newNodeId,
             content: titleInputState,
             coordinates: [
-                schema.nodes[schema.nodes.length - 1].coordinates[0] + 200,
-                schema.nodes[schema.nodes.length - 1].coordinates[1],
+                initialSchema.nodes[schema.nodes.length - 1].coordinates[0] + 200,
+                initialSchema.nodes[schema.nodes.length - 1].coordinates[1],
             ],
             render: NewNodeRender,
             data: {
@@ -223,7 +241,7 @@ function CreateDiagram( {nodes} ) {
             },
             inputs: [{ id: newNodeId}]
         };
-        console.log(schema.nodes);
+        console.log(initialSchema.nodes);
         addNode(nextNode);
         // setInterval(() => {
         //     deleteNodeFromSchema(newNodeId);
@@ -232,10 +250,9 @@ function CreateDiagram( {nodes} ) {
     }
 
     const submit = (event) => {
-        let listOfNodes = []
         for ( let newNode of newNodeListState) {
             let parentId = "";
-            for ( let link of schema.links ){
+            for ( let link of initialSchema.links ){
                 if ( newNode.id === link["input"] ){
                     if (parseInt(link["output"]) < parseInt(link["input"])) {
                         parentId = link["output"];
@@ -275,12 +292,12 @@ function CreateDiagram( {nodes} ) {
         //     "yLocation": 0
         // }
 
-        // for ( let node of schema.nodes ) {
+        // for ( let node of initialSchema.nodes ) {
         //     let x = node.coordinates[0] - node.coordinates[0]%100;
         //     let y = node.coordinates[1] - node.coordinates[1]%200;
         //     let parentId = "";
         //     let inputId = node.inputs[0]["id"];
-        //     // for ( let link of schema.links ){
+        //     // for ( let link of initialSchema.links ){
         //     //     if ( inputId === link["input"]){
         //     //         if (link["output"] < link["input"]) {
         //     //             parentId = link["output"];
@@ -314,16 +331,16 @@ function CreateDiagram( {nodes} ) {
 
     const initialSchema = createSchema({
         nodes: [
-            ...nodesOfTree
+            ...nodesOfTreeState
         ],
         links: [
-            ...links
+            ...linksState
         ]
     });
 
     const [schema, { onChange, addNode, removeNode }] = useSchema(initialSchema);
+    console.log(initialSchema);
     console.log(schema);
-    console.log(nodesOfTree);
 
     return (
         <div className="Simple-diagram">
@@ -332,7 +349,7 @@ function CreateDiagram( {nodes} ) {
                 <input className="title-input" onChange={handlerTitleInput} type="text" placeholder="title of node" />
             </div>
             <div className="tree-container">
-                <Diagram schema={schema} onChange={onChange} />
+                <Diagram schema={initialSchema} onChange={onChange} />
             </div>
             <div className="sbmit">
                 <button className="submit-btn" onClick={submit} >ثبت</button>
