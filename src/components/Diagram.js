@@ -1,5 +1,6 @@
 import React, {useState , useEffect} from 'react';
 import CreateDiagram from "./CreateDiagram";
+import CreateDiagram2 from "./CreateDiagram2";
 
 const RootDiv = ( id, content, rootNode, onClick ) => {
     return (
@@ -171,7 +172,6 @@ function Diagram() {
 
 
     const clickOnRoot = (id, rootNode) => {
-        console.log("dddddd");
         let listOfNodes = [];
         if ( dataState.projects.length !== 0 ){
             let maxWidth = 0, maxHeight = 0;
@@ -265,7 +265,7 @@ function Diagram() {
             {/*<CreateDiagram nodes={listOfNodes}/>*/}
             <div className="frame" style={styleState}>
                 {renderListOfRoot()}
-                {listOfNodesState.length !== 0 && <CreateDiagram nodes={listOfNodesState}/>}
+                {listOfNodesState.length !== 0 && <CreateDiagram2 nodes={listOfNodesState}/>}
                 {/*{creatDiagram()}*/}
             </div>
         </>

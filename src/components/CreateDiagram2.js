@@ -39,25 +39,10 @@ function CreateDiagram( {nodes} ) {
     let links = [];
 
     const updateCoordinates = ( event, id ) => {
-        let x = 0;
-        let y = 0;
-        // console.log(initialSchema);
-        // console.log(schema);
-        // console.log("//////////////");
-        for ( let node of initialSchema.nodes ){
-            console.log(node);
-            console.log(node.id);
-            console.log("----------");
-            console.log(initialSchema);
-            console.log(schema);
-            console.log(id);
-            console.log("----------");
-            if ( node.id === id ) {
-                x = node.coordinates[0] - node.coordinates[0]%200;
-                y = node.coordinates[1] - node.coordinates[1]%100;
-                console.log(`x: ${x} y: ${y}`)
-            }
-        }
+        let tempX = event.clientX - document.getElementsByClassName("tree-container")[0].offsetLeft + event.view.scrollX;
+        let tempY = event.clientY - document.getElementsByClassName("tree-container")[0].offsetTop + event.view.scrollY;
+        let x = tempX - tempX%200;
+        let y = tempY - tempY%100;
 
         const axios = require('axios');
         axios.post(`https://project.dinavision.org/api/v1/Project/UpdateProjectLocation?projectId=${id}&xLocation=${x}&yLocation=${y}`)
@@ -69,16 +54,11 @@ function CreateDiagram( {nodes} ) {
     }
 
     const [newNodeListState, setNewNodeList] = useState([]);
-    // const [hasLink]
     const updateNodeData = ( event, id, content ) => {
-        let x = 0;
-        let y = 0;
-        for ( let node of initialSchema.nodes ){
-            if ( node.id === id ) {
-                x = node.coordinates[0] - node.coordinates[0]%200;
-                y = node.coordinates[1] - node.coordinates[1]%100;
-            }
-        }
+        let tempX = event.clientX - document.getElementsByClassName("tree-container")[0].offsetLeft;
+        let tempY = event.clientY - document.getElementsByClassName("tree-container")[0].offsetTop;
+        let x = tempX - tempX%200;
+        let y = tempY - tempY%100;
         let data = {
             id,
             content,
@@ -99,58 +79,6 @@ function CreateDiagram( {nodes} ) {
             }
             return tempList
         })
-        // let parentId = "";
-        // for ( let link of initialSchema.links ){
-        //     if ( id === link["input"] ){
-        //         if (link["output"] < link["input"]) {
-        //             parentId = link["output"];
-        //         }
-        //     }
-        //     if ( id === link["output"] ){
-        //         if (link["input"] < link["output"]) {
-        //             parentId = link["input"];
-        //         }
-        //     }
-        // }
-        // let temp;
-        // let data;
-        // if (parentId !== ''){
-        //     temp = nodes.filter(node => node.id === parentId );
-        //     data = {
-        //         id: id,
-        //         parentId: parentId,
-        //         route: temp[0].route + `/${parentId}`,
-        //         xLocation: x,
-        //         yLocation: y
-        //     }
-        //
-        // }
-        // console.log(initialSchema.links);
-        // if ( data !== undefined) {
-        //     setNewNodeList(prevState =>{
-        //         let tempList = prevState;
-        //         let exist = false;
-        //         for ( let index in tempList ){
-        //             if ( tempList[index].id === id ){
-        //                 tempList[index] = data;
-        //                 exist = true;
-        //             }
-        //         }
-        //         if ( !exist ) {
-        //             tempList.push(data);
-        //         }
-        //         return tempList
-        //     })
-        // }
-
-
-        // const axios = require('axios');
-        // axios.post(`https://project.dinavision.org/api/v1/Project/UpdateProjectLocation?projectId=${id}&xLocation=${x}&yLocation=${y}`)
-        //     .then(response => {
-        //         console.log(response.message)
-        //     }).catch( error => {
-        //     console.log(error)
-        // })
     }
 
     const createNode = (node) => {
@@ -184,6 +112,8 @@ function CreateDiagram( {nodes} ) {
 
     const [nodesOfTreeState, setNodesOfTree] = useState([]);
     const [linksState, setLinkState] = useState([]);
+    const [ali, setAli] = useState(null);
+    const [schemaTemp, setSchemaTest] = useState(null);
     useEffect(() => {
         for ( let node of nodes) {
             nodesOfTree.push(createNode(node));
@@ -191,6 +121,15 @@ function CreateDiagram( {nodes} ) {
                 links.push(createLink(node))
             }
         }
+        const initialSchema = createSchema({
+            nodes: [
+                ...nodesOfTreeState
+            ],
+            links: [
+                ...linksState
+            ]
+        });
+        setAli(initialSchema);
         setNodesOfTree(nodesOfTree);
         setLinkState(links);
     }, [nodes])
@@ -233,8 +172,8 @@ function CreateDiagram( {nodes} ) {
             id: newNodeId,
             content: titleInputState,
             coordinates: [
-                initialSchema.nodes[schema.nodes.length - 1].coordinates[0] + 200,
-                initialSchema.nodes[schema.nodes.length - 1].coordinates[1],
+                Math.floor(Math.random() * Math.floor(1000)),
+                Math.floor(Math.random() * Math.floor(300)),
             ],
             render: NewNodeRender,
             data: {
@@ -244,11 +183,9 @@ function CreateDiagram( {nodes} ) {
             inputs: [{ id: newNodeId}]
         };
         console.log(initialSchema.nodes);
+        console.log(nextNode);
+        console.log(addNode);
         addNode(nextNode);
-        // setInterval(() => {
-        //     deleteNodeFromSchema(newNodeId);
-        // }, 1000)
-
     }
 
     const submit = (event) => {
@@ -279,7 +216,9 @@ function CreateDiagram( {nodes} ) {
                     xLocation: newNode.xLocation,
                     yLocation: newNode.yLocation
                 }
-                addRequest(data)
+                console.log(initialSchema);
+                console.log(data);
+                // addRequest(data)
             }
         }
 
@@ -349,7 +288,7 @@ function CreateDiagram( {nodes} ) {
     });
 
     const [schema, { onChange, addNode, removeNode }] = useSchema(initialSchema);
-    console.log(initialSchema);
+    // console.log(initialSchema);
     console.log(schema);
 
     return (
@@ -358,7 +297,7 @@ function CreateDiagram( {nodes} ) {
                 <button className="add-node-btn" onClick={addNewNode} >اضافه کردن تسک</button>
                 <input className="title-input" onChange={handlerTitleInput} type="text" placeholder="title of node" />
             </div>
-            <div className="tree-container">
+            <div className="tree-container" id="tree-container">
                 <Diagram schema={initialSchema} onChange={onChange} />
             </div>
             <div className="sbmit">
